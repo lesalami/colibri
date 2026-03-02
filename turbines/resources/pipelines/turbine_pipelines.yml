@@ -5,6 +5,6 @@ resources:
       development: true
       continuous: false
       libraries:
-        - file: ../src/dlt_pipeline.py
+        - file: ../src/turbines_etl/dlt_pipeline.py
       configuration:
         input_path: "/Volumes/workspace/default/turbines"

@@ -9,4 +9,4 @@ resources:
             node_type_id: Standard_DS3_v2
             num_workers: 1
           spark_python_task:
-            python_file: ../run_tests.py
+            python_file: ../scripts/run_tests.py
