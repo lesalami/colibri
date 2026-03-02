@@ -1,0 +1,10 @@
+resources:
+  pipelines:
+    bronze_silver_gold_pipeline:
+      name: colibri-wind-turbine-dlt
+      development: true
+      continuous: false
+      libraries:
+        - file: ../src/dlt_pipeline.py
+      configuration:
+        input_path: "/Volumes/workspace/default/turbines"
