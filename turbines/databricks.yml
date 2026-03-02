@@ -5,11 +5,8 @@ bundle:
   uuid: 40ca79e5-e117-4cec-8a1c-8f6aff58fed9
 
 include:
-  - resources/*.yml
-  - resources/*/*.yml
-  - src/**
-  - scripts/*.yml
-  - tests/*.yml
+  - resources/**/*.yml
+  
 # Variable declarations. These variables are assigned in the dev/prod targets below.
 variables:
   catalog:
