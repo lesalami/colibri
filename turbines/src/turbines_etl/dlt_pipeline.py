@@ -34,31 +34,29 @@ def bronze():
         .load(input_path)
     )
 
-    print("Bronze input_path:", input_path)
-    print("Bronze DataFrame is streaming:", df.isStreaming)
-    print("Bronze DataFrame schema:", df.schema)
-
-    query = df.writeStream.format("memory").queryName("bronze_debug").outputMode("append").option("checkpointLocation", "/Volumes/workspace/dev_lesalami_wind_turbines/checkpoints/bronze_debug").start()
-
-    spark.sql("SELECT * FROM bronze_debug").show()
-
     # df = df.withColumn(
     #     "data_group",
     #     regexp_extract(col("_metadata.file_path"), "data_group_(\\d+)", 1)
     # )
-    return df
+    return (
+    df.withColumn(
+        "data_group",
+        regexp_extract(col("_metadata.file_path"), "data_group_(\\d+)", 1)
+    )
+    .withColumn("ingestion_timestamp", current_timestamp())
+)
 
 # =====================================================
 # SILVER LAYER (Clean + Validate)
 # =====================================================
 
-@dp.table(name="silver_turbine_data")
+@dp.table(name="silver_turbine_data", comment="Raw ingestion of turbine CSV files from UC Volume")
 @dp.expect_or_drop("valid_power_range", "power_output_mw BETWEEN 0 AND 10")
 @dp.expect_or_drop("valid_wind_speed", "wind_speed BETWEEN 0 AND 60")
 @dp.expect_or_drop("not_null_timestamp", "timestamp IS NOT NULL")
 def silver():
 
-    df = dp.read("bronze_turbine_data")
+    df = dp.read_stream("bronze_turbine_data")
 
     return (
         df.withColumn("timestamp", to_timestamp("timestamp"))
@@ -75,7 +73,7 @@ def silver():
 )
 def quarantine():
 
-    df = dp.read("bronze_turbine_data")
+    df = dp.read_stream("bronze_turbine_data")
 
     return df.filter(
         (col("power_output_mw") < 0) |
@@ -92,7 +90,7 @@ def quarantine():
 @dp.table(name="gold_turbine_summary")
 def gold_summary():
 
-    df = dp.read("silver_turbine_data") \
+    df = dp.read_stream("silver_turbine_data") \
             .withColumn("date", to_date("timestamp"))
 
     summary = TurbineTransformer.calculate_daily_summary(df)
@@ -119,7 +117,7 @@ def gold_summary():
 @dp.table(name="gold_turbine_anomalies")
 def gold_anomalies():
 
-    df = dp.read("silver_turbine_data") \
+    df = dp.read_stream("silver_turbine_data") \
             .withColumn("date", to_date("timestamp"))
 
     summary = dp.read("gold_turbine_summary")
