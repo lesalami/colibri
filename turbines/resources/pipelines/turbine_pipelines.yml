@@ -1,10 +1,13 @@
 resources:
   pipelines:
     bronze_silver_gold_pipeline:
-      name: colibri-wind-turbine-dlt
+      name: turbine-dlt
       development: true
-      continuous: false
+      serverless: true
+      catalog: ${var.catalog}
+      target: ${var.schema}
       libraries:
-        - file: ../src/turbines_etl/dlt_pipeline.py
+        - file:
+            path: ../../src/turbines_etl/dlt_pipeline.py
       configuration:
-        input_path: "/Volumes/workspace/default/turbines"
+        input_path: "/Volumes/${var.catalog}/${var.schema}/turbines"
