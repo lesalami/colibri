@@ -1,6 +1,7 @@
 import dlt
-from pyspark.sql.functions import *
-from pyspark.sql.types import *
+from pyspark.sql.functions import regexp_extract, input_file_name, current_timestamp, to_timestamp, col, to_date, sum
+from pyspark.sql.types import StructType, StructField, StringType, DoubleType
+from turbines_etl.turbine_transformer import TurbineTransformer
 
 # Unity Catalog Volume Path
 input_path = spark.conf.get("input_path")
@@ -16,31 +17,6 @@ input_path = spark.conf.get("input_path")
 # =====================================================
 # BRONZE LAYER
 # =====================================================
-
-# @dlt.table(
-#     name="bronze_turbine_data",
-#     comment="Raw ingestion of turbine CSV files from UC Volume"
-# )
-# def bronze():
-
-#     df = (
-#         spark.readStream
-#         .format("cloudFiles")
-#         .option("cloudFiles.format", "csv")
-#         .option("header", "true")
-#         # .option("cloudFiles.inferColumnTypes", "false")
-#         # .schema(schema)
-#         .load(input_path)
-#     )
-
-#     # return (
-#     #     df.withColumn(
-#     #         "data_group",
-#     #         regexp_extract(input_file_name(), "data_group_(\\d+)", 1)
-#     #     )
-#     #     .withColumn("ingestion_timestamp", current_timestamp())
-#     # )
-#     return TurbineTransformer.clean_data(df)
 
 @dlt.table(
     name="bronze_turbine_data",

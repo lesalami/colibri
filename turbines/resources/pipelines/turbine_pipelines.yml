@@ -9,5 +9,3 @@ resources:
       libraries:
         - file:
             path: ../../src/turbines_etl/dlt_pipeline.py
-      configuration:
-        input_path: "/Volumes/${var.catalog}/${var.schema}/turbines"

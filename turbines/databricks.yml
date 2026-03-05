@@ -26,6 +26,8 @@ targets:
     default: true
     workspace:
       host: https://dbc-c3ed0cf6-bfd3.cloud.databricks.com
+      # We explicitly deploy to /Workspace/Users/lesalami@gmail.com to make sure we only have a single copy.
+      root_path: /Workspace/Users/lesalami@gmail.com/.bundle/${bundle.name}/${bundle.target}
     variables:
       catalog: workspace
       schema: wind_turbines
