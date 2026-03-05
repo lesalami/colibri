@@ -1,7 +1,7 @@
 import dlt
 from pyspark.sql.functions import regexp_extract, input_file_name, current_timestamp, to_timestamp, col, to_date, sum
 from pyspark.sql.types import StructType, StructField, StringType, DoubleType
-from turbines_etl.turbine_transformer import TurbineTransformer
+from utils.turbine_transformer import TurbineTransformer
 
 # Unity Catalog Volume Path
 input_path = spark.conf.get("input_path")
