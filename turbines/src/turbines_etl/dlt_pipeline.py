@@ -14,13 +14,6 @@ from utils.turbine_transformer import TurbineTransformer
 # Unity Catalog Volume Path
 input_path = "/Volumes/workspace/dev_lesalami_wind_turbines/turbines"
 
-# schema = StructType([
-#     StructField("timestamp", StringType(), True),
-#     StructField("turbine_id", StringType(), True),
-#     StructField("wind_speed", DoubleType(), True),
-#     StructField("wind_direction", DoubleType(), True),
-#     StructField("power_output_mw", DoubleType(), True)
-# ])
 
 # =====================================================
 # BRONZE LAYER
@@ -37,15 +30,23 @@ def bronze():
         .format("cloudFiles")
         .option("cloudFiles.format", "csv")
         .option("header", "true")
+        .option("checkpointLocation", "/Volumes/workspace/dev_lesalami_wind_turbines/checkpoints/bronze_autoloader")
         .load(input_path)
     )
 
-    df = df.withColumn(
-        "data_group",
-        regexp_extract(col("_metadata.file_path"), "data_group_(\\d+)", 1)
-    )
+    print("Bronze input_path:", input_path)
+    print("Bronze DataFrame is streaming:", df.isStreaming)
+    print("Bronze DataFrame schema:", df.schema)
 
-    return TurbineTransformer.clean_data(df)
+    query = df.writeStream.format("memory").queryName("bronze_debug").outputMode("append").option("checkpointLocation", "/Volumes/workspace/dev_lesalami_wind_turbines/checkpoints/bronze_debug").start()
+
+    spark.sql("SELECT * FROM bronze_debug").show()
+
+    # df = df.withColumn(
+    #     "data_group",
+    #     regexp_extract(col("_metadata.file_path"), "data_group_(\\d+)", 1)
+    # )
+    return df
 
 # =====================================================
 # SILVER LAYER (Clean + Validate)

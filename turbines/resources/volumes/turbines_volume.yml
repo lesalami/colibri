@@ -5,3 +5,8 @@ resources:
       schema_name: ${var.schema}
       name: turbines
       comment: Volume for turbine CSV ingestion
+    checkpoint_volume:
+      catalog_name: ${var.catalog}
+      schema_name: ${var.schema}
+      name: checkpoints
+      comment: Checkpoint for Autoloader
