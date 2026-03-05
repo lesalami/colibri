@@ -15,7 +15,7 @@ class TurbineTransformer:
             df.filter(col("turbine_id").isNotNull())
               .withColumn("wind_speed", col("wind_speed").cast("double"))
               .withColumn("wind_direction", col("wind_direction").cast("double"))
-              .withColumn("power_output_mw", col("power_output_mw").cast("double"))
+              .withColumn("power_output", col("power_output").cast("double"))
         )
 
 
@@ -24,10 +24,10 @@ class TurbineTransformer:
         return (
             df.groupBy("data_group", "turbine_id", "date")
               .agg(
-                  min("power_output_mw").alias("min_power"),
-                  max("power_output_mw").alias("max_power"),
-                  avg("power_output_mw").alias("avg_power"),
-                  stddev("power_output_mw").alias("std_power")
+                  min("power_output").alias("min_power"),
+                  max("power_output").alias("max_power"),
+                  avg("power_output").alias("avg_power"),
+                  stddev("power_output").alias("std_power")
               )
         )
 
@@ -40,5 +40,5 @@ class TurbineTransformer:
 
         return df.withColumn(
             "is_anomaly",
-            abs(col("power_output_mw") - col("avg_power")) > 2 * col("std_power")
+            abs(col("power_output") - col("avg_power")) > 2 * col("std_power")
         )

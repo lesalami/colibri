@@ -6,8 +6,8 @@ src_path = os.path.abspath(os.path.join(os.getcwd(), '..'))
 if src_path not in sys.path:
     sys.path.insert(0, src_path)
 
-import dlt
-from pyspark.sql.functions import regexp_extract, input_file_name, current_timestamp, to_timestamp, col, to_date, sum
+from pyspark import pipelines as dp
+from pyspark.sql.functions import regexp_extract, current_timestamp, to_timestamp, col, to_date, sum
 from pyspark.sql.types import StructType, StructField, StringType, DoubleType
 from utils.turbine_transformer import TurbineTransformer
 
@@ -26,7 +26,7 @@ input_path = "/Volumes/workspace/dev_lesalami_wind_turbines/turbines"
 # BRONZE LAYER
 # =====================================================
 
-@dlt.table(
+@dp.table(
     name="bronze_turbine_data",
     comment="Raw ingestion of turbine CSV files from UC Volume"
 )
@@ -42,7 +42,7 @@ def bronze():
 
     df = df.withColumn(
         "data_group",
-        regexp_extract(input_file_name(), "data_group_(\\d+)", 1)
+        regexp_extract(col("_metadata.file_path"), "data_group_(\\d+)", 1)
     )
 
     return TurbineTransformer.clean_data(df)
@@ -51,13 +51,13 @@ def bronze():
 # SILVER LAYER (Clean + Validate)
 # =====================================================
 
-@dlt.table(name="silver_turbine_data")
-@dlt.expect_or_drop("valid_power_range", "power_output_mw BETWEEN 0 AND 10")
-@dlt.expect_or_drop("valid_wind_speed", "wind_speed BETWEEN 0 AND 60")
-@dlt.expect_or_drop("not_null_timestamp", "timestamp IS NOT NULL")
+@dp.table(name="silver_turbine_data")
+@dp.expect_or_drop("valid_power_range", "power_output_mw BETWEEN 0 AND 10")
+@dp.expect_or_drop("valid_wind_speed", "wind_speed BETWEEN 0 AND 60")
+@dp.expect_or_drop("not_null_timestamp", "timestamp IS NOT NULL")
 def silver():
 
-    df = dlt.read("bronze_turbine_data")
+    df = dp.read("bronze_turbine_data")
 
     return (
         df.withColumn("timestamp", to_timestamp("timestamp"))
@@ -68,13 +68,13 @@ def silver():
 # QUARANTINE TABLE
 # =====================================================
 
-@dlt.table(
+@dp.table(
     name="silver_quarantine_turbine_data",
     comment="Rows failing validation rules"
 )
 def quarantine():
 
-    df = dlt.read("bronze_turbine_data")
+    df = dp.read("bronze_turbine_data")
 
     return df.filter(
         (col("power_output_mw") < 0) |
@@ -88,10 +88,10 @@ def quarantine():
 # GOLD LAYER - DAILY SUMMARY
 # =====================================================
 
-@dlt.table(name="gold_turbine_summary")
+@dp.table(name="gold_turbine_summary")
 def gold_summary():
 
-    df = dlt.read("silver_turbine_data") \
+    df = dp.read("silver_turbine_data") \
             .withColumn("date", to_date("timestamp"))
 
     summary = TurbineTransformer.calculate_daily_summary(df)
@@ -115,13 +115,13 @@ def gold_summary():
 # GOLD LAYER - ANOMALIES
 # =====================================================
 
-@dlt.table(name="gold_turbine_anomalies")
+@dp.table(name="gold_turbine_anomalies")
 def gold_anomalies():
 
-    df = dlt.read("silver_turbine_data") \
+    df = dp.read("silver_turbine_data") \
             .withColumn("date", to_date("timestamp"))
 
-    summary = dlt.read("gold_turbine_summary")
+    summary = dp.read("gold_turbine_summary")
 
     joined = df.join(
         summary,
