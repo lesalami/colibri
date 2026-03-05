@@ -3,10 +3,7 @@ from pyspark.sql.functions import *
 from pyspark.sql.types import *
 
 # Unity Catalog Volume Path
-input_path = spark.conf.get(
-    "input_path",
-    "/Volumes/workspace/default/turbines"
-)
+input_path = spark.conf.get("input_path")
 
 # schema = StructType([
 #     StructField("timestamp", StringType(), True),
