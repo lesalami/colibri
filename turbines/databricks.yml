@@ -6,9 +6,6 @@ bundle:
 
 include:
   - resources/**/*.yml
-
-pipeline:
-  code_root: src
   
 # Variable declarations. These variables are assigned in the dev/prod targets below.
 variables:
@@ -16,8 +13,6 @@ variables:
     description: The catalog to use
   schema:
     description: The schema to use
-  input_path:
-    description: Path to turbine CSV files 
 
 targets:
   dev:
@@ -34,7 +29,7 @@ targets:
     variables:
       catalog: workspace
       schema: wind_turbines
-      input_path: /Volumes/workspace/dev_${workspace.current_user.short_name}_wind_turbines/turbines
+
   prod:
     mode: production
     workspace:
@@ -44,7 +39,6 @@ targets:
     variables:
       catalog: workspace
       schema: wind_turbines
-      input_path: /Volumes/workspace/wind_turbines/turbines
     permissions:
       - user_name: lesalami@gmail.com
         level: CAN_MANAGE

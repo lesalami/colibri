@@ -5,7 +5,7 @@ resources:
       development: true
       serverless: true
       catalog: ${var.catalog}
-      target: ${var.schema}
+      schema: ${var.schema}
       libraries:
         - file:
             path: ../../src/turbines_etl/dlt_pipeline.py
