@@ -1,11 +1,12 @@
 resources:
   pipelines:
     bronze_silver_gold_pipeline:
-      name: turbine-dlt
-      development: true
+      name: turbines_etl
       serverless: true
       catalog: ${var.catalog}
-      schema: ${var.schema}
+      target: ${var.schema}
+      configuration:
+        input_path: ${var.input_path}
       libraries:
         - file:
             path: ../../src/turbines_etl/dlt_pipeline.py

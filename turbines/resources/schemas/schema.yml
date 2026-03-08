@@ -3,4 +3,4 @@ resources:
     turbine_schema:
       catalog_name: ${var.catalog}
       name: ${var.schema}
-      comment: Schema for turbine lakehouse tables
+      comment: Schema for turbine DLT tables

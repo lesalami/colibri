@@ -1,6 +1,6 @@
-import pytest
 import sys
+import pytest
 
-exit_code = pytest.main(["-v", "tests"])
-
-sys.exit(exit_code)
+if __name__ == "__main__":
+    exit_code = pytest.main(["-v", "tests"])
+    sys.exit(exit_code)
